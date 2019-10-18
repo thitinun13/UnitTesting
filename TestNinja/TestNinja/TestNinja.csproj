@@ -51,10 +51,23 @@
     <Compile Include="Fundamentals\HtmlFormatter.cs" />
     <Compile Include="Fundamentals\Math.cs" />
     <Compile Include="Fundamentals\Reservation.cs" />
+    <Compile Include="Mocking\BookingHelper.cs" />
+    <Compile Include="Mocking\BookingRepository.cs" />
+    <Compile Include="Mocking\EmployeeStorage.cs" />
+    <Compile Include="Mocking\EmployeeController.cs" />
+    <Compile Include="Mocking\FileDownloader.cs" />
+    <Compile Include="Mocking\InstallerHelper.cs" />
+    <Compile Include="Mocking\VideoRepository.cs" />
+    <Compile Include="Mocking\Product.cs" />
+    <Compile Include="Mocking\OrderService.cs" />
+    <Compile Include="Mocking\Program.cs" />
+    <Compile Include="Mocking\FileReader.cs" />
+    <Compile Include="Mocking\VideoService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
