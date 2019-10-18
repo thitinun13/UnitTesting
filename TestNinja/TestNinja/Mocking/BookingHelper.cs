@@ -23,7 +23,12 @@ public static class BookingHelper
         }
     }
 
-    public class UnitOfWork
+    public interface IUnitOfWork
+    {
+        IQueryable<T> Query<T>();
+    }
+
+    public class UnitOfWork : IUnitOfWork
     {
         public IQueryable<Booking> Query<T>()
         {
