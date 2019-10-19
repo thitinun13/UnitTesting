@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Moq;
 using NUnit.Framework;
@@ -9,7 +10,7 @@ namespace TestNinja.UnitTests.Mocking
     [TestFixture]
     public class HouseKeeperServiceTests
     {
-        private HousekeeperService _service;
+        private HouseKeeperService _service;
         private Mock<IStatementGenerator> _statementGenerator;
         private Mock<IEmailSender> _emailSender;
         private Mock<IXtraMessageBox> _messageBox;
@@ -23,79 +24,78 @@ namespace TestNinja.UnitTests.Mocking
             _houseKeeper = new Housekeeper { Email = "a", FullName = "b", Oid = 1, StatementEmailBody = "c" };
 
             var unitOfWork = new Mock<IUnitOfWork>();
-
             unitOfWork.Setup(uow => uow.Query<Housekeeper>()).Returns(new List<Housekeeper>
             {
                 _houseKeeper
-        }.AsQueryable());
+            }.AsQueryable());
 
             _statementFileName = "fileName";
             _statementGenerator = new Mock<IStatementGenerator>();
             _statementGenerator
                 .Setup(sg => sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, (_statementDate)))
                 .Returns(() => _statementFileName);
-            
+
             _emailSender = new Mock<IEmailSender>();
             _messageBox = new Mock<IXtraMessageBox>();
 
-                _service = new HousekeeperSevice(
-                 unitOfWork.Object,
+            _service = new HouseKeeperService(
+                unitOfWork.Object,
                 _statementGenerator.Object,
                 _emailSender.Object,
                 _messageBox.Object);
         }
+
         [Test]
         public void SendStatementEmails_WhenCalled_GenerateStatements()
         {
             _service.SendStatementEmails(_statementDate);
 
             _statementGenerator.Verify(sg =>
-               sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, (_statementDate)));
+                sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, (_statementDate)));
         }
 
         [Test]
-        public void SendStatementEmails_HouseKeepersEmailIsNull_ShouldNotGenerateStatements()
+        public void SendStatementEmails_HouseKeepersEmailIsNull_ShouldNotGenerateStatement()
         {
             _houseKeeper.Email = null;
-            
+
             _service.SendStatementEmails(_statementDate);
 
             _statementGenerator.Verify(sg =>
-               sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, (_statementDate)),
-               Times.Never);
+                sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, (_statementDate)),
+                Times.Never);
         }
 
         [Test]
-        public void SendStatementEmails_HouseKeepersEmailIsWhitespace_ShouldNotGenerateStatements()
+        public void SendStatementEmails_HouseKeepersEmailIsWhitespace_ShouldNotGenerateStatement()
         {
             _houseKeeper.Email = " ";
 
             _service.SendStatementEmails(_statementDate);
 
             _statementGenerator.Verify(sg =>
-               sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, (_statementDate)),
-               Times.Never);
+                sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, (_statementDate)),
+                Times.Never);
         }
 
         [Test]
-        public void SendStatementEmails_HouseKeepersEmailIsEmpty_ShouldNotGenerateStatements()
+        public void SendStatementEmails_HouseKeepersEmailIsEmpty_ShouldNotGenerateStatement()
         {
             _houseKeeper.Email = "";
 
             _service.SendStatementEmails(_statementDate);
 
             _statementGenerator.Verify(sg =>
-               sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, (_statementDate)),
-               Times.Never);
+                sg.SaveStatement(_houseKeeper.Oid, _houseKeeper.FullName, (_statementDate)),
+                Times.Never);
         }
 
         [Test]
         public void SendStatementEmails_WhenCalled_EmailTheStatement()
         {
-           _service.SendStatementEmails(_statementDate);
+            _service.SendStatementEmails(_statementDate);
 
-            VerifyEmailNotSent();
-
+            VerifyEmailSent();
         }
 
         [Test]
@@ -131,7 +131,7 @@ namespace TestNinja.UnitTests.Mocking
         [Test]
         public void SendStatementEmails_EmailSendingFails_DisplayAMessageBox()
         {
-            _emialSender.Setup(EmailSender => es.EmailFile(
+            _emailSender.Setup(es => es.EmailFile(
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
@@ -146,13 +146,14 @@ namespace TestNinja.UnitTests.Mocking
         private void VerifyEmailNotSent()
         {
             _emailSender.Verify(es => es.EmailFile(
-               It.IsAny<string>(),
-               It.IsAny<string>(),
-               It.IsAny<string>(),
-               It.IsAny<string>()),
-               Times.Never);
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()),
+                Times.Never);
         }
-        private void VerifyEmailNotSent()
+
+        private void VerifyEmailSent()
         {
             _emailSender.Verify(es => es.EmailFile(
                 _houseKeeper.Email,
@@ -162,8 +163,4 @@ namespace TestNinja.UnitTests.Mocking
         }
 
     }
-
 }
-
-
-
